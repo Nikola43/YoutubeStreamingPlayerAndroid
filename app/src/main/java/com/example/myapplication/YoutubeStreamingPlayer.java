@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
 import java.io.IOException;
@@ -28,17 +29,49 @@ import java.net.URL;
 import java.util.Objects;
 
 public class YoutubeStreamingPlayer extends AppCompatActivity {
+    String videoUrl = null;
+    YouTubePlayerView youTubePlayerView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youtube_streaming_player);
 
+        // bind youtube player layout
+        youTubePlayerView = findViewById(R.id.youtube_player_view);
+
+
         //TODO
         // get steaming video url from api
-        final String videoUrl = "https://www.youtube.com/watch?v=bebuiaSKtU4";
+        videoUrl = "https://www.youtube.com/watch?v=bebuiaSKtU4";
         //final String videoUrl = "https://www.youtube.com/watch?v=hHW1oY26hxQ"; // not available url
 
+        // check if youtube player has instantiated successfully and videoUrl is valid yotube url
+        if (youTubePlayerView != null
+                && videoUrl != null
+                && videoUrl.length() > 0
+                && URLUtil.isValidUrl(videoUrl)
+                && Patterns.WEB_URL.matcher(videoUrl).matches()) {
+            // set full screen mode
+            setFullScreenVideoMode();
+
+            // add youtube player observer
+            getLifecycle().addObserver(youTubePlayerView);
+
+            // add youtube player listener
+            youTubePlayerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
+                @Override
+                public void onReady(@NonNull YouTubePlayer youTubePlayer) {
+                    // extract videoId from url
+                    final String videoId = videoUrl.split("=")[1];
+                    // play youtube video
+                    youTubePlayer.loadVideo(videoId, 0);
+                }
+            });
+        }
+    }
+
+    private void setFullScreenVideoMode() {
         // hide toolbar
         Objects.requireNonNull(getSupportActionBar()).hide();
 
@@ -51,30 +84,9 @@ public class YoutubeStreamingPlayer extends AppCompatActivity {
         // set full screen layout
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
-        // bind youtube player layout
-        YouTubePlayerView youTubePlayerView = findViewById(R.id.youtube_player_view);
-
-        // set full screen mode
+        // set youtube player full screen mode
         youTubePlayerView.enterFullScreen();
-
-        // add youtube player listener
-        getLifecycle().addObserver(youTubePlayerView);
-
-        // add youtube player listener
-        youTubePlayerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
-            @Override
-            public void onReady(@NonNull YouTubePlayer youTubePlayer) {
-                // check if is valid url
-                if (URLUtil.isValidUrl(videoUrl))
-                    // check if is youtube url
-                    if (Patterns.WEB_URL.matcher(videoUrl).matches()) {
-                        // extract videoId from url
-                        final String videoId = videoUrl.split("=")[1];
-
-                        // play youtube video
-                        youTubePlayer.loadVideo(videoId, 0);
-                    }
-            }
-        });
     }
+
+
 }
