@@ -47,10 +47,15 @@ public class YoutubeStreamingPlayer extends AppCompatActivity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.TRANSPARENT);
+
+        // set full screen layout
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         // bind youtube player layout
         YouTubePlayerView youTubePlayerView = findViewById(R.id.youtube_player_view);
+
+        // set full screen mode
+        youTubePlayerView.enterFullScreen();
 
         // add youtube player listener
         getLifecycle().addObserver(youTubePlayerView);
